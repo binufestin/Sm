@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Workspace | STOMAN</title>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <link href="./resources/style.css" rel="stylesheet" type="text/css" media="all">
+  <link rel="stylesheet" type="text/css" href="./css/mbContainer.css" title="style"  media="screen"/>
+  <link href="./resources/pirobox.css" rel="stylesheet" type="text/css"	media="all">
+
+  <script type="text/javascript">
+  loadAsyncScripts(['./resources/jquery-1.4.js']);
+
+  var onJQueryLoad = function() {
+	  loadAsyncScripts(['./resources/jquery.metadata.js', './resources/jquery-ui-1.8.6.custom.min.js']);
+  }
+  
+  var onJQueryUILoad = function() {
+	  loadAsyncScripts(['./resources/mbContainer.js', './resources/pirobox.js']);
+  }
+  
+  function loadAsyncScripts(asyncScripts) {
+		var head = document.getElementsByTagName("head")[0];
+		for(as in asyncScripts) {
+			var script = document.createElement("script");
+			script.setAttribute("src", asyncScripts[as]);
+			head.appendChild(script);
+		}
+	}
+
+  window.onload = function() {
+	  document.getElementsByTagName('body')[0].focus();
+	  parent.document.onkeydown = openContainer;
+  }
+  
+  document.onkeydown = openContainer;
+  
+  // Used to Initialize an IFrames inside a Container
+  // onRestore. So, it is important to make this Singleton.
+  var IFrameInit = (function() {
+	    var instance = null;
+		var iFrames = {};
+	    function Constructor() {
+	    	// get the container id and  write all the fields
+	    	// passed by the user in a object against a field
+	    	// in iFrames
+	        this.writeData = function(container, fields) {
+	        	var id = container.attr('id');
+	            if(typeof iFrames[id] == 'undefined'
+	            		|| iFrames[id] == null) {
+	            	iFrames[id] = {};
+	            }
+	        	$.each(fields, function(key, value){
+	        		iFrames[id][key] = value;
+	        	});
+	        } 
+	        
+	    	// read all the fields that are found against the
+	    	// id of the container passed
+	        this.readData = function(container) {
+	        	var id = container.attr('id');
+	        	// Clone it before passing the date to the
+	        	// requester and empty the data stote for that
+	        	// container. 
+	        	var iFrame = jQuery.extend(true, {}, iFrames[id]);
+	        	iFrames[id] = {};
+	        	return iFrame;
+	        };
+	    }
+
+	    return new function() {
+	        this.getInstance = function() {
+	            if (instance == null) {
+	                instance = new Constructor();
+	                instance.constructor = null;
+	            }
+	            return instance;
+	        }
+	    }
+	})();
+
+	function showContainer(id) {
+		var id = $('#' + id);
+		id.mb_iconize();
+		//if(id.mb_getState('iconized'))
+			//id.mb_iconize();
+		if(id.mb_getState('iconized'))
+			setTimeout(function() { id.mb_iconize(); }, 500);
+	}
+  
+	function iconizeContainer(id) {
+		$('#' + id).mb_iconize();
+	}   
+	
+	function setIframeHeight(iframeId) {
+	    var elt = document.getElementById(iframeId);
+	    if(elt.contentWindow){
+	    	var sh = elt.contentWindow.document.body.scrollHeight;
+	    	var ch = elt.contentWindow.document.body.clientHeight;
+	    	if(sh > ch) { 
+	    		document.getElementById(iframeId).height = elt.contentWindow.document.body.scrollHeight;
+	    	} else {
+		    	while(true) {
+		    		document.getElementById(iframeId).height -= 1;
+		    		sh = elt.contentWindow.document.body.scrollHeight;
+		    		ch = elt.contentWindow.document.body.clientHeight;
+		    		if(sh != ch) {
+		    			document.getElementById(iframeId).height = 
+		    				parseInt(document.getElementById(iframeId).height) + 1;
+		    			break;
+		    		}
+		    	}
+	    	}
+	    }
+	}
+	
+	function getElement(id) {
+		return $('#' + id);
+	}
+
+	function openContainer(e) {
+		if(!e) e = window.event; 
+		//$('#keypressevent').val(e.keyCode + " " + e.altKey); 
+		if(e.keyCode == 49 && e.altKey)
+			iconizeContainer('av');
+	}
+	
+	function widgetTop() {
+		return (parent.document.body.clientHeight - 570) / 2 + 'px';
+	}
+
+	function widgetLeft() {
+		return (document.body.clientWidth - 800) / 2 + 'px';
+	}
+	
+	function addPO2Modal(a, ul) {
+		$('#po-modal').append(a);
+		//$('#po-modal').append(ul);
+		var li = ul.find('li');
+		var orders = li.html().split(' | ');
+		$.each(orders, function(i, val) {
+			var order = $('<li/>').html(val);
+			ul.append(order);
+		});
+		li.remove();
+		var vendorId = ul.attr('id');
+		var div = $('<div/>', {id: ul.attr('id')});
+		div.append(ul.removeAttr('id'));
+		$('#po-modal').append(div);
+		div.css('text-align', 'center');
+		
+		var ifDiv = $('<div/>').append($('<iframe/>', {
+											src: 'pages/addVendor.html?:' + vendorId,
+											width: '700px',
+											height: '500px',
+											frameborder: '0',
+									    }));
+		div.append(ifDiv);
+		ifDiv.css('text-align', 'center');
+	}
+	
+	function showPOModal(ref) {
+		$('#po-modal a[data-pov="' + ref + '"]').click();
+		//alert(ref + " " + $('#po-modal a[data-pov="' + ref + '"]'));
+		//alert($('#po-modal ul#' + ref)[0].innerHTML);
+	}
+
+	function invokePiroBox() {
+		var navigation = $('a.pirobox_gall1').size() > 1;
+		var selector;
+		if(!navigation) {
+			$('a.pirobox_gall1').removeClass('pirobox_gall1').addClass('pirobox');
+			selector = 'a.pirobox';
+		} else {
+			selector = 'a.pirobox_gall1';
+		}
+		$(selector).piroBox_ext({
+        	piro_speed : 900,
+        	bg_alpha : 1.0,
+        	piro_scroll : true 
+    	});
+	}
+	
+	function removePiroBox() {
+		$('a.pirobox_gall1').remove();
+		$('#po-modal').children().remove();
+		$('.piro_html').remove();
+	}
+
+  </script>
+
+</head>
+<body>
+<form id="ws-form">
+<div class="wrapper">
+  <h1 align="right"></h1>
+  <p></p>
+  <br>
+  <br>
+  <br>
+  <div id="av" class="containerPlus draggable resizable {buttons:'m,i', icon:'vendor.png', skin:'white', width:'800',iconized:'true', dock:'dock', title:'Partnering a Vendor', iSrc: 'pages/addVendor.html'}" style="position:fixed;">
+    <div class="evidence" align="center">
+    </div>
+   	<iframe id="add-vendor-container" src="pages/d.html" 
+		allowtransparency="true" 
+		frameborder="0" width="100%" height="450px;" ></iframe>
+  </div>
+
+  <div id="am" class="containerPlus draggable resizable {buttons:'m,i', icon:'material.png', skin:'white', width:'800',iconized:'true', dock:'dock', title:'Build Raw Material', iSrc:'pages/addMaterial.html'}" style="position:fixed;">
+    <div class="evidence" align="center">
+    </div>
+   	<iframe id="add-material-container" src="pages/d.html" 
+		allowtransparency="true" 
+		frameborder="0" width="100%" height="450px"></iframe>
+  </div>
+
+  <div id="avm" class="containerPlus draggable resizable {buttons:'m,i', icon:'vendor-material.png', skin:'white', width:'800',iconized:'true', dock:'dock', title:'Vendor - Material Mapping', iSrc: 'pages/addVendorMaterial.html'}" style="position:fixed;">
+    <div class="evidence" align="center">
+    </div>
+   	<iframe id="add-vendor-material-container" src="pages/d.html" 
+		allowtransparency="true" 
+		frameborder="0" width="100%" height="450px"></iframe>
+  </div>
+  
+  <div id="cpo" class="containerPlus draggable resizable {buttons:'m,i', icon:'purchase_order.png', skin:'white', width:'800',iconized:'true', dock:'dock', title:'Craft a Purchase Order', iSrc:'pages/createPurchaseOrder.html'}" style="position:fixed;" >
+    <div class="evidence" align="center">
+    </div>
+   	<iframe id="create-purchase-order" src="pages/d.html" 
+		allowtransparency="true" 
+		frameborder="0" width="100%" height="450px" ></iframe>
+  </div>
+
+
+ 
+  <div id="dock"></div>
+  <button id="open" onclick="$('.containerPlus').mb_open(); $(this).fadeOut();" style="display:none;">open closed containers </button>
+  <div id="po-modal" style="display: none; color: white;">
+  </div>
+</div>
+</form>
+</body>
+</html>
+ 

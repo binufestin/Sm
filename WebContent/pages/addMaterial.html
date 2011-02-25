@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Add Material | STOMAN</title>
+<link href="../resources/uniform.default.css" rel="stylesheet"
+	type="text/css" media="all">
+<link href="../resources/uniform.aristo.css" rel="stylesheet"
+	type="text/css" media="all">
+<link href="../resources/style.css" rel="stylesheet" type="text/css"
+	media="all">
+
+<script src="../resources/jquery-1.4.js" type="text/javascript"></script>
+<script src="../resources/jquery.uniform.min.js" type="text/javascript"></script>
+<script type='text/javascript' src='../resources/common.js'></script>
+<script type='text/javascript' src='../dwr/engine.js'></script>
+<script type='text/javascript' src='../dwr/util.js'></script>
+<script type='text/javascript' src='../dwr/interface/Material.js'></script>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		pageInit('am');
+	});
+	
+	function create() {
+		var page = $('#add-material'); 
+		preAjax(page);
+		Material.create(dwr.util.getValues('add-material'), function(stat) {
+			postAjax(page);
+			var cn = detectAndDoClassName(stat);
+			var type = detectAndDoType(stat, 'Material Created.', 'add-material');
+			acknowledge(cn, stat, type);
+		});
+	}
+</script>
+
+</head>
+<body>
+<form id="add-material">
+<table width="100%" style="padding-top: 20px;">
+	<tr>
+		<td><label for="name" name="name_lbl">Name</label></td>
+		<td><input name="name" class="text" /></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td><label for="sensitivity" name="sensitivity_lbl">Sensitivity</label></td>
+		<td><input type="radio" name="sensitivity" value="1" checked="checked"/><label>Weaker</label></td>
+		<td><input type="radio" name="sensitivity" value="2"/><label>Weak</label></td>
+		<td><input type="radio" name="sensitivity" value="3"/><label>Strong</label></td>
+	</tr>
+	<tr>
+		<td><label for="importance" name="importance_lbl">Importance</label></td>
+		<td><input type="radio" name="importance" value="1" checked="checked"/><label>High</label></td>
+		<td><input type="radio" name="importance" value="2"/><label>Medium</label></td>
+		<td><input type="radio" name="importance" value="3"/><label>Low</label></td>
+	</tr>
+	<tr>
+		<td colspan="4" align="center" style="padding-top: 20px;"><a
+			id="create" class="awesome green" onclick="javascript: create();">Create</a>
+		<a class="awesome green" onclick="javascript: fresh('add-material');">Clear</a>
+		</td>
+	</tr>
+</table>
+</form>
+
+</body>
+</html>

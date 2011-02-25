@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Add Vendor | STOMAN</title>
+<link href="../resources/uniform.default.css" rel="stylesheet" type="text/css" media="all">
+<link href="../resources/uniform.aristo.css" rel="stylesheet" type="text/css" media="all">
+<link href="../resources/style.css" rel="stylesheet" type="text/css" media="all">
+<link rel="stylesheet" type="text/css" href="../css/mbContainer.css" title="style"  media="screen"/>
+<script src="../resources/jquery-1.4.js"	type="text/javascript"></script>
+<script src="../resources/jquery.uniform.min.js"	type="text/javascript"></script>
+<script type='text/javascript' src='../dwr/engine.js'></script>
+<script type='text/javascript' src='../dwr/util.js'></script>
+<script type='text/javascript' src='../dwr/interface/Vendor.js'></script>
+<script type='text/javascript' src='../resources/common.js'></script>
+<script type="text/javascript" src="../resources/mbContainer.js"></script>
+<script type="text/javascript" src="../resources/jquery-ui-1.8.6.custom.min.js"></script>
+<script type="text/javascript" src="../resources/jquery.metadata.js"></script>
+
+<style type="text/css">
+	body {
+		margin: 0;
+	}
+	
+	table tr td {
+		padding: 6px 20px 6px 20px;	
+	}
+</style>
+
+<script type="text/javascript">
+
+	$(document).ready(function(){
+		pageInit('av');
+		$('input:not([name="name"])').blur(create);
+		$('input[name="name"]').keyup(get).blur(create);
+		var initName = this.URL.split('?:');
+		if(initName[1]) {
+			$('input[name="name"]').val(initName[1]);
+			get();
+		}
+	});
+
+	function oldcreate() {
+		var page = $('#add-vendor'); 
+		preAjax(page);
+		Vendor.create(dwr.util.getValues('add-vendor'), function(stat) {
+			postAjax(page);
+			var cn = detectAndDoClassName(stat);
+			var type = detectAndDoType(stat, 'Vendor Created.', 'add-vendor');
+			acknowledge(cn, stat, type);
+			if(type != "Error.") {
+				$('<a class="awesome no-border magenta"/>')
+				.html('Add Material')
+				.appendTo(infoBar.append("."))
+				.click(function() {
+					infoBar.hide();
+					parent.iconizeContainer('av');
+					parent.IFrameInit.getInstance().writeData($(parent.document).find('#avm'), 
+							{
+								vendor_name: stat.split(':')[1]
+							});
+					parent.showContainer('avm');
+				});
+			}
+		});
+	}
+	
+	function create() {
+		Vendor.create(dwr.util.getValues('add-vendor'), function(stat) {
+			if(stat instanceof String) {
+				alert(stat);
+				return;
+			}
+			populate(stat);
+			$('#new-vendor').css('display', 'none');
+		});
+	}
+	
+	function get() {
+		Vendor.get(dwr.util.getValues('add-vendor'), function(stat) {
+			if(stat instanceof String) {
+				alert(stat);
+				return;
+			}
+			if(!stat.vendorId) {
+				$('#new-vendor').css('display', 'inline-block');
+				var name = $('input[name="name"]').val();
+				fresh('add-vendor');
+				$('input[name="name"]').val(name);
+			} else {
+				$('#new-vendor').css('display', 'none');
+				populate(stat);
+			}
+		});
+	}
+	
+	function populate(obj, prefix) {
+		$.each(obj, function(k, v) {
+			if(v instanceof Object)
+				populate(v, k + ".")
+			$('input[name="' + prefix + k + '"]').val(v == null ? "" : v);
+		});
+	}
+	
+</script>
+
+</head>
+<body>
+<form id="add-vendor">
+<table width="100%" style="padding-top: 20px;">
+	<tr>
+		<td><label for="name" name="name_lbl">Name</label></td>
+		<td colspan="3"><input name="name" class="text"/> &nbsp; <img  id="new-vendor" alt="New Vendor" src="../images/new.png" style="display: none;"></td>
+	</tr>
+	<tr>
+		<td><label for="addresses.streetName1" name="streetName1_lbl">Plot No. &amp; Name </label></td>
+		<td><input name="addresses.streetName1" class="text"/></td>
+		<td><label for="addresses.streetName2" name="streetName2_lbl">Street</label></td>
+		<td><input name="addresses.streetName2" class="text"/></td>
+	</tr>
+	<tr>
+		<td><label for="addresses.area" name="area_lbl">Area</label></td>
+		<td><input name="addresses.area" class="text"/></td>
+		<td><label for="addresses.city" name="city_lbl">City</label></td>
+		<td><input name="addresses.city" class="text"/></td>
+	</tr>
+	<tr>
+		<td><label for="addresses.zip" name="zip_lbl">Pincode</label></td>
+		<td><input name="addresses.zip" class="text"/></td>
+		<td><label for="addresses.state" name="state_lbl">State</label></td>
+		<td><input name="addresses.state" class="text"/></td>
+	</tr>
+	<tr>
+		<td><label for="addresses.country" name="country_lbl">Country</label></td>
+		<td><input name="addresses.country" class="text"/></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td><label for="addresses.phone" name="phone_lbl">Phone</label></td>
+		<td><input name="addresses.phone" class="text"/></td>
+		<td><label for="addresses.mobile" name="mobile_lbl">Mobile</label></td>
+		<td><input name="addresses.mobile" class="text"/></td>
+	</tr>
+	<tr>
+		<td><label for="addresses.fax" name="fax_lbl">Fax</label></td>
+		<td><input name="addresses.fax" class="text"/></td>
+		<td><label for="addresses.email" name="email_lbl">email</label></td>
+		<td><input name="addresses.email" class="text"/></td>
+	</tr>
+	<tr>
+		<td colspan="4" align="right" style="padding-top: 50px;">
+			<a class="awesome green" onclick="javascript: fresh('add-vendor');" style="text-decoration: none;">Clear</a>
+		</td>
+	</tr>	
+</table>
+</form>
+</body>
+</html>

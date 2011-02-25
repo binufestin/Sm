@@ -1,0 +1,122 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0087)file:///D:/Gears/Programmer/HTML%205/MetaLab/np%20%20%20METATAB_services.htm -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>Workspace | STOMAN</title>
+<link href="./resources/style.css" rel="stylesheet" type="text/css" media="all">
+<script src="./resources/jquery-1.4.js"	type="text/javascript"></script>
+<script type='text/javascript' src='dwr/engine.js'></script>
+<script type='text/javascript' src='dwr/interface/MenuBuilder.js'></script>
+
+<script type="text/javascript">
+var onJQueryLoad = function() {
+	loadAsyncScripts(['./resources/jquery-ui-1.8.6.custom.min.js']);	
+};
+
+var myStuffs = false;
+
+	MenuBuilder.build(function(items) {
+		var parent = $('#menu');
+		$.each(items, function(key, value) {
+			getDOMElement(key, value, 'buildStuffs')
+				.appendTo(parent); 
+		});
+		parent.find('li a').click(); //FIXME: Works for only one menu item
+	});
+	
+	function getDOMElement(key, value, methodName) {
+		var menuName = key.split('#');
+		var li = $('<li/>');
+		$('<a/>').html(menuName[0])
+		         .attr('href', '#')
+		         .appendTo(li)
+		         .click(function() {
+		        	 buildStuffs(menuName[1], value);
+		         });
+		return li;
+	}
+
+	function buildStuffs(key, value) {
+		//<iframe id="searchStuffs" src="" class="stuff-frame" frameborder="0" allowtransparency="true"></iframe>
+		//$('#searchStuffs').attr('src', value);
+		if(myStuffs)
+			return;
+		
+		$('<iframe/>', {  
+		    id: 'myStuffs', 
+		    frameborder: '0',
+		    allowtransparency: 'true',
+		    css: {
+		    	height: '100%',
+				width: '100%',
+				border: '0',
+				
+		    },
+		    src: value,
+		}).appendTo($('#wg-container'));
+		
+		myStuffs = true;
+	}
+
+	// May not be used methods follow
+	function buildSubMenu(key, value) {
+		//alert('test aclle ' + key);
+		var parent = $('#submenu');
+		parent.children().detach();
+		MenuBuilder.build(key, function(items) {
+			$.each(items, function(key, value) {
+				buildDOMElement(key, value, 'buildWorkground')
+					.appendTo(parent)
+					.find('a')
+					.addClass('small yellow awesome');
+			});
+		});
+	}
+	
+	function buildWorkground(key, value) {
+		alert('bulding');
+	}
+
+	function buildDOMElement(key, value, methodName) {
+		var menuName = key.split('#');
+		var li = $('<li/>');
+		$('<a/>').html(menuName[0])
+		         .attr('href', 'javascript:' + methodName + '(' + '\'' + menuName[1] + '\', \'' + value + '\'' + ')')
+		         .appendTo(li);
+		return li;
+	}
+	
+</script>
+
+</head>
+
+<body style="background: #273433;">
+<div id="main">
+<div id="head">
+ <div id="head-main">
+  <div id="head-sup">
+   <h1><a href="index.htm" class="logo"></a></h1>
+   <ul id="menu">
+   </ul>
+   </div>
+ </div>
+</div>
+<div id="center">
+<div id="center-main">
+<div id="center-sup">
+   <ul id="submenu">
+   </ul>
+</div>
+ </div>
+ 
+</div>
+
+<div id="work-ground" class="workground shadow">
+	<div style="width: 100%; height: 100%;" id="wg-container">
+		
+	</div>
+</div>
+</div>
+
+
+<div style="background-image: initial; background-attachment: initial; background-origin: initial; background-clip: initial; background-color: rgb(255, 255, 191); border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-style: initial; border-color: initial; color: rgb(0, 0, 0); margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; font-family: arial, sans-serif; font-size: 13px; font-style: normal; font-variant: normal; font-weight: normal; height: auto; line-height: normal; text-align: left; width: auto; direction: ltr; z-index: 99995; background-position: initial initial; background-repeat: initial initial; "></div></body></html>

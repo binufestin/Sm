@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dwr PUBLIC
+    "-//GetAhead Limited//DTD Direct Web Remoting 3.0//EN"
+    "http://getahead.org/dwr/dwr30.dtd">
+<dwr>
+	<allow>
+		<convert converter="object" match="org.np.stoman.persistence.*">
+			<param name="force" value="true"/>
+		</convert>
+		<create creator="script" javascript="Authenticate">
+			<param name="class" value="org.np.stoman.ajax.interfaze.Authenticate" />
+			<param name="language" value="beanshell" />
+			<!-- TODO: Move to scriptPath -->
+			<param name="script">
+				import org.np.stoman.proxy.ProxyProvider;
+				import org.np.stoman.ajax.interfaze.Authenticate;
+				import org.np.stoman.ajax.interfaze.impl.AuthenticateImpl;
+				return (Authenticate) ProxyProvider.getProxy(Authenticate.class, new AuthenticateImpl());
+    		</param>
+		</create>
+		<create creator="script" javascript="MenuBuilder">
+			<param name="class" value="org.np.stoman.ajax.interfaze.MenuBuilder" />
+			<param name="language" value="beanshell" />
+			<!-- TODO: Move to scriptPath -->
+			<param name="script">
+				import org.np.stoman.proxy.ProxyProvider;
+				import org.np.stoman.ajax.interfaze.MenuBuilder;
+				import org.np.stoman.ajax.interfaze.impl.MenuBuilderImpl;
+				return (MenuBuilder) ProxyProvider.getProxy(MenuBuilder.class, new MenuBuilderImpl());
+    		</param>
+		</create>
+		<create creator="script" javascript="Vendor">
+			<param name="class" value="org.np.stoman.ajax.interfaze.Vendor" />
+			<param name="language" value="beanshell" />
+			<!-- TODO: Move to scriptPath -->
+			<param name="script">
+				import org.np.stoman.proxy.ProxyProvider;
+				import org.np.stoman.ajax.interfaze.Vendor;
+				import org.np.stoman.ajax.interfaze.impl.VendorImpl;
+				return (Vendor) ProxyProvider.getProxy(Vendor.class, new VendorImpl());
+    		</param>
+		</create>
+		<create creator="script" javascript="Material">
+			<param name="class" value="org.np.stoman.ajax.interfaze.Material" />
+			<param name="language" value="beanshell" />
+			<!-- TODO: Move to scriptPath -->
+			<param name="script">
+				import org.np.stoman.proxy.ProxyProvider;
+				import org.np.stoman.ajax.interfaze.Material;
+				import org.np.stoman.ajax.interfaze.impl.MaterialImpl;
+				return (Material) ProxyProvider.getProxy(Material.class, new MaterialImpl());
+    		</param>
+		</create>
+		<create creator="script" javascript="AutoComplete">
+			<param name="class" value="org.np.stoman.ajax.interfaze.AutoComplete" />
+			<param name="language" value="beanshell" />
+			<!-- TODO: Move to scriptPath -->
+			<param name="script">
+				import org.np.stoman.proxy.ProxyProvider;
+				import org.np.stoman.ajax.interfaze.AutoComplete;
+				import org.np.stoman.ajax.interfaze.impl.AutoCompleteImpl;
+				return (AutoComplete) ProxyProvider.getProxy(AutoComplete.class, new AutoCompleteImpl());
+    		</param>
+		</create>
+		<create creator="script" javascript="PurchaseOrder">
+			<param name="class" value="org.np.stoman.ajax.interfaze.PurchaseOrder" />
+			<param name="language" value="beanshell" />
+			<!-- TODO: Move to scriptPath -->
+			<param name="script">
+				import org.np.stoman.proxy.ProxyProvider;
+				import org.np.stoman.ajax.interfaze.PurchaseOrder;
+				import org.np.stoman.ajax.interfaze.impl.PurchaseOrderImpl;
+				return (PurchaseOrder) ProxyProvider.getProxy(PurchaseOrder.class, new PurchaseOrderImpl());
+    		</param>
+		</create>
+	</allow>
+</dwr>
