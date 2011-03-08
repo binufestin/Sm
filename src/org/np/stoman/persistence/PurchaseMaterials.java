@@ -15,7 +15,7 @@ public class PurchaseMaterials implements java.io.Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -165925518677180610L;
-	private int purchaseMaterialId;
+	private Integer purchaseMaterialId;
 	private PurchaseOrders purchaseOrders;
 	private VendorMaterials vendorMaterials;
 	private Users users;
@@ -28,11 +28,29 @@ public class PurchaseMaterials implements java.io.Serializable {
 	private Date delieveredDate;
 	private Date cancelledDate;
 	private BigDecimal transportatonCharge;
+	private BigDecimal orderedPricePerQty;
+	private String data;
+
+	public BigDecimal getOrderedPricePerQty() {
+		return orderedPricePerQty;
+	}
+
+	public void setOrderedPricePerQty(BigDecimal orderedPricePerQty) {
+		this.orderedPricePerQty = orderedPricePerQty;
+	}
+
+	public String getData() {
+		return data;
+	}
+
+	public void setData(String data) {
+		this.data = data;
+	}
 
 	public PurchaseMaterials() {
 	}
 
-	public PurchaseMaterials(int purchaseMaterialId,
+	public PurchaseMaterials(Integer purchaseMaterialId,
 			PurchaseOrders purchaseOrders, VendorMaterials vendorMaterials,
 			Date date, int orderedQuantity, int receivedQuantity, int createdBy) {
 		this.purchaseMaterialId = purchaseMaterialId;
@@ -44,7 +62,7 @@ public class PurchaseMaterials implements java.io.Serializable {
 		this.createdBy = createdBy;
 	}
 
-	public PurchaseMaterials(int purchaseMaterialId,
+	public PurchaseMaterials(Integer purchaseMaterialId,
 			PurchaseOrders purchaseOrders, VendorMaterials vendorMaterials,
 			Users users, Date date, int orderedQuantity, int receivedQuantity,
 			int createdBy, Integer modifiedDate, Date dueDate,
@@ -66,11 +84,11 @@ public class PurchaseMaterials implements java.io.Serializable {
 		this.transportatonCharge = transportatonCharge;
 	}
 
-	public int getPurchaseMaterialId() {
+	public Integer getPurchaseMaterialId() {
 		return this.purchaseMaterialId;
 	}
 
-	public void setPurchaseMaterialId(int purchaseMaterialId) {
+	public void setPurchaseMaterialId(Integer purchaseMaterialId) {
 		this.purchaseMaterialId = purchaseMaterialId;
 	}
 

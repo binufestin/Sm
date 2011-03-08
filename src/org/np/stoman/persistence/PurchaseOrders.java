@@ -15,20 +15,29 @@ public class PurchaseOrders implements java.io.Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 5365337266942387054L;
-	private int purchaseOrderId;
+	private Integer purchaseOrderId;
 	private BigDecimal amount;
 	private BigDecimal discount;
 	private Set<PurchaseMaterials> purchaseMaterialses = new HashSet<PurchaseMaterials>(
 			0);
+	private Object data;
+
+	public Object getData() {
+		return data;
+	}
+
+	public void setData(Object data) {
+		this.data = data;
+	}
 
 	public PurchaseOrders() {
 	}
 
-	public PurchaseOrders(int purchaseOrderId) {
+	public PurchaseOrders(Integer purchaseOrderId) {
 		this.purchaseOrderId = purchaseOrderId;
 	}
 
-	public PurchaseOrders(int purchaseOrderId, BigDecimal amount,
+	public PurchaseOrders(Integer purchaseOrderId, BigDecimal amount,
 			BigDecimal discount, Set<PurchaseMaterials> purchaseMaterialses) {
 		this.purchaseOrderId = purchaseOrderId;
 		this.amount = amount;
@@ -36,11 +45,11 @@ public class PurchaseOrders implements java.io.Serializable {
 		this.purchaseMaterialses = purchaseMaterialses;
 	}
 
-	public int getPurchaseOrderId() {
+	public Integer getPurchaseOrderId() {
 		return this.purchaseOrderId;
 	}
 
-	public void setPurchaseOrderId(int purchaseOrderId) {
+	public void setPurchaseOrderId(Integer purchaseOrderId) {
 		this.purchaseOrderId = purchaseOrderId;
 	}
 

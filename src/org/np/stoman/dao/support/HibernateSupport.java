@@ -27,7 +27,7 @@ public class HibernateSupport {
 	}
 
 	public <T> T get(Class<T> t, int id) {
-		return t.cast(session.get().load(t, id));
+		return t.cast(session.get().get(t, id));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -103,7 +103,15 @@ public class HibernateSupport {
 	public <T> void evict(T t) {
 		session.get().evict(t);
 	}
-	
+
+	public void flush() {
+		session.get().flush();
+	}
+
+	public <T> void delete(T t) {
+		session.get().delete(t);
+	}
+
 	public void setSession(Session session) {
 		this.session.set(session);
 	}

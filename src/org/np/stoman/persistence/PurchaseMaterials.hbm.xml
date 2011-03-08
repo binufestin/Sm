@@ -4,14 +4,14 @@
 <!-- Generated 17 Oct, 2010 12:55:11 PM by Hibernate Tools 3.2.2.GA -->
 <hibernate-mapping>
     <class name="org.np.stoman.persistence.PurchaseMaterials" table="purchase_materials" catalog="stoman">
-        <id name="purchaseMaterialId" type="int">
+        <id name="purchaseMaterialId" type="integer">
             <column name="purchase_material_id" />
             <generator class="increment" />
         </id>
         <many-to-one name="purchaseOrders" class="org.np.stoman.persistence.PurchaseOrders" fetch="select">
             <column name="purchase_order_id" not-null="true" />
         </many-to-one>
-        <many-to-one name="vendorMaterials" class="org.np.stoman.persistence.VendorMaterials" fetch="select">
+        <many-to-one name="vendorMaterials" class="org.np.stoman.persistence.VendorMaterials" fetch="select" lazy="false">
             <column name="vendor_material_id" not-null="true" />
         </many-to-one>
         <many-to-one name="users" class="org.np.stoman.persistence.Users" fetch="select">
@@ -42,7 +42,10 @@
             <column name="cancelled_date" length="19" />
         </property>
         <property name="transportatonCharge" type="big_decimal">
-            <column name="transportaton_charge" precision="5" />
+            <column name="transportaton_charge" precision="10" />
+        </property>
+        <property name="orderedPricePerQty" type="big_decimal">
+            <column name="ordered_price_per_qty" precision="10" />
         </property>
     </class>
 </hibernate-mapping>

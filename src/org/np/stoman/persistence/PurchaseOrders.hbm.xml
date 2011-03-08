@@ -4,7 +4,7 @@
 <!-- Generated 17 Oct, 2010 12:55:11 PM by Hibernate Tools 3.2.2.GA -->
 <hibernate-mapping>
     <class name="org.np.stoman.persistence.PurchaseOrders" table="purchase_orders" catalog="stoman">
-        <id name="purchaseOrderId" type="int">
+        <id name="purchaseOrderId" type="integer">
             <column name="purchase_order_id" />
             <generator class="increment" />
         </id>
@@ -14,7 +14,7 @@
         <property name="discount" type="big_decimal">
             <column name="discount" precision="5" />
         </property>
-        <set name="purchaseMaterialses" inverse="true" cascade="all">
+        <set name="purchaseMaterialses" inverse="true" cascade="all-delete-orphan" lazy="false">
             <key>
                 <column name="purchase_order_id" not-null="true" />
             </key>

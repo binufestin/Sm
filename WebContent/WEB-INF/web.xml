@@ -10,7 +10,7 @@
     </init-param>
     <init-param>
       <param-name>accessLogLevel</param-name>
-      <param-value>EXCEPTION</param-value>
+      <param-value>CALL</param-value>
     </init-param>
   </servlet>
   <servlet-mapping>

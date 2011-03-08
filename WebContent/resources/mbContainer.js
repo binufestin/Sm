@@ -843,7 +843,8 @@ $(function(){
       onRestore:function(o){
       	restore(o); 
       	var iframe = o.find('iframe'); 
-      	if(iframe.attr('src') == 'pages/d.html')
+      	//if(iframe.attr('src') == 'pages/d.html')
+      	if(iframe.attr('src') == '')
       		iframe.attr('src', o.metadata().iSrc);
       	//alert($(o.find('iframe')[0].contentWindow.document.body).find('#vendor_name')[0]);
       	$.each(IFrameInit.getInstance().readData(o), function(id, value) {

@@ -14,7 +14,7 @@ public class VendorMaterials implements java.io.Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -5162973170913935714L;
-	private int vendorMaterialId;
+	private Integer vendorMaterialId;
 	private Vendors vendors;
 	private Materials materials;
 	private Users users;
@@ -27,7 +27,7 @@ public class VendorMaterials implements java.io.Serializable {
 	public VendorMaterials() {
 	}
 
-	public VendorMaterials(int vendorMaterialId, Vendors vendors,
+	public VendorMaterials(Integer vendorMaterialId, Vendors vendors,
 			Materials materials, Users users, Date priceStartDate,
 			Date modifiedDate) {
 		this.vendorMaterialId = vendorMaterialId;
@@ -38,7 +38,7 @@ public class VendorMaterials implements java.io.Serializable {
 		this.modifiedDate = modifiedDate;
 	}
 
-	public VendorMaterials(int vendorMaterialId, Vendors vendors,
+	public VendorMaterials(Integer vendorMaterialId, Vendors vendors,
 			Materials materials, Users users, Date priceStartDate,
 			Date modifiedDate, Integer maxQtyPerOrder,
 			Set<PurchaseMaterials> purchaseMaterialses) {
@@ -51,11 +51,11 @@ public class VendorMaterials implements java.io.Serializable {
 		this.maxQtyPerOrder = maxQtyPerOrder;
 	}
 
-	public int getVendorMaterialId() {
+	public Integer getVendorMaterialId() {
 		return this.vendorMaterialId;
 	}
 
-	public void setVendorMaterialId(int vendorMaterialId) {
+	public void setVendorMaterialId(Integer vendorMaterialId) {
 		this.vendorMaterialId = vendorMaterialId;
 	}
 
@@ -114,11 +114,11 @@ public class VendorMaterials implements java.io.Serializable {
 	public void setData(String data) {
 		this.data = data;
 	}
-	
+
 	public Float getPricePerQty() {
 		return pricePerQty;
 	}
-	
+
 	public void setPricePerQty(Float pricePerQty) {
 		this.pricePerQty = pricePerQty;
 	}

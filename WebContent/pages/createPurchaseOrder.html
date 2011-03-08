@@ -10,145 +10,115 @@
 	type="text/css" media="all">
 <link href="../resources/style.css" rel="stylesheet" type="text/css"
 	media="all">
-<link href="../resources/jquery.marquee.css" rel="stylesheet" type="text/css"
-	media="all">
-<link href="../resources/jquery.autocomplete.css" rel="stylesheet" type="text/css" media="all">
-
 <script src="../resources/jquery-1.4.js" type="text/javascript"></script>
 <script src="../resources/jquery.uniform.min.js" type="text/javascript"></script>
 <script type='text/javascript' src='../dwr/engine.js'></script>
 <script type='text/javascript' src='../dwr/util.js'></script>
 <script type='text/javascript' src='../resources/common.js'></script>
-<script type='text/javascript' src='../resources/jquery.autocomplete.js'></script>
 <script type='text/javascript' src='../dwr/interface/PurchaseOrder.js'></script>
-<script type='text/javascript' src='../resources/jquery.marquee.js'></script>
-
-
 
 <script type="text/javascript">
 
 var order;
 var minus;
+var pmLink = 1;
+var syncPO = null, syncPMS = null, syncPmLinker = null;
 
 	$(document).ready(function(){
-		initAutoComplete('#material', findValueForMaterial, 'getMaterials');
-		initAutoComplete('#vendor', findValueForVendor, 'vendorNames');
-		
-		pageInit('cpo');
 		order = $('#order-clone').clone();
 		$('label.remove').live('click', function() {
 			$(this).parents('tr').remove();
+			generate();
 		});
 		minus = $('<label/>').html('-').addClass('remove');
 
-		$('#material').focus();
+		$('#material').keyup(getVendorMaterial).blur(generate);
+		$('#vendor').keyup(getVendorMaterial4Vendor).blur(generate);
+		$('#qty').keyup(estimate).blur(generate);
+		$('#received').keyup(estimate).blur(generate);
+		$('#material-cost').keyup(estimate).blur(generate);
+		$('#material-cost-paid').keyup(estimate).blur(generate);
+		$('#poId').keyup(getPO).focus();
+		//window.setInterval("syncPurchaseOrder()", 1000);
 	});
 	
-	function initAutoComplete(selector, onFindMethod, serverMethod) {
-		$(selector).autocomplete('../auto/complete', { 
-			matchContains: true,
-			mustMatch: 1,
-			cacheLength: 10,
-			maxItemsToShow: 3,
-			delay: 1,
-			handleMustMatch:true,
-			onFindValue:onFindMethod,
-			minChars: 0,
-			extraParams: { method: serverMethod }
-		}).keyup(function() {
-			this.autocompleter.findValue();
-			//if(this.value == '')
-				//toggleNewVM(this, 'none');
-		}).blur(function() {
-			this.autocompleter.findValue();
-		});
-	}
-
 	function generate() {
-		var obj = {};
+		var po = {};
+		var pms = [];
+		var pmLinker = {};
+		var poId = $('#poId');
+		po.purchaseOrderId = $.trim(poId.val()) != "" ? $.trim(poId.val()) : null;
+		po.amount = $('#po-amount').html();
+		
 		$('#orders tr[id!="cntrl"]').each(function(i, tr) {
 			var material = $(tr).find('#material');
 			var quantity = $(tr).find('#qty');
 			var vendor = $(tr).find('#vendor');
-			if(material.val() != '' && quantity.val() != '') {
-				obj[material.val()] = obj[material.val()] 
-						? obj[material.val()] + parseInt(quantity.val())
-						: parseInt(quantity.val());
-				if(vendor.css('display') != 'none')
-					obj['v_' + material.val()] = vendor.val(); //TODO: multiple vendor for same material?
+			var received = $(tr).find('#material-received');
+			var price = $(tr).find('#material-cost');
+			var paid = $(tr).find('#material-cost-paid-total');
+			if($.trim(material.val()) === '' || $.trim(quantity.val()) === '' 
+					|| $.trim(vendor.val()) === '' || $.trim(price.val()) === '')
+				return true;//continue
+			var pm = { //vendorMaterials: { vendorMaterialId: $(this).attr('data-vmId') },
+					   //purchaseMaterialId: $(tr).attr('data-pmId') ? $(tr).attr('data-pmId') : null,
+					   data: pmLink,	
+					   orderedQuantity: quantity.val(),
+					   receivedQuantity: received.html(),
+					   transportatonCharge: paid.html(),
+					   orderedPricePerQty: price.val()
+					  };
+			var vm = { vendors : { name : $.trim(vendor.val()) },
+					   materials: { name: $.trim(material.val()) },
+					   //pricePerQty: price.val()
+					 };
+			if(!isNaN(parseInt($(this).attr('data-vmId'))))  {
+				vm.vendorMaterialId = $(this).attr('data-vmId');
+			} else {
+				vm.vendorMaterialId = -1;
 			}
+			$(tr).attr('data-pmLink', pmLink);
+			//alert(!isNaN(parseInt($(this).attr('data-vmId'))));
+			pmLinker[pmLink] = vm; 
+			pms.push(pm);
+			pmLink++;
 		});
-		PurchaseOrder.generate(obj, function(data) {
-			toSave = data;
-			var po = $('#po-confirm');
-			po.html('');
-			
-			$.each(data, function(vId, vM) {
-				var ul = $('<ul/>', {className: 'marquee', id: vM[0].vendors.name})
-							.appendTo($('<td/>').appendTo($('<tr/>').appendTo(po)));
-				var vendor = $('<td/>').append('<div/>', {className: 'vendor'})
-								.appendTo(ul.parents('tr'));
-				ul.attr('vAddress', vM[0].vendors.addresses);
-				var modal = $('<a/>', {href: '#', rel: 'inline-300-150', className: 'pirobox_gall1'})
-								.append(vendor.find('div')).appendTo(vendor)
-								.html(vM[0].vendors.name)
-								.click(function() {
-									parent.showPOModal(vM[0].vendors.name);
+		if(pms.length <= 0)
+			return;
+		syncPO = po;
+		syncPMS = pms;
+		syncPmLinker = pmLinker;
+		PurchaseOrder.generate(po, pms, pmLinker, 
+				{ callback: function(data) {
+								poId.val(data.purchaseOrderId);
+								var vmIds = data.data.split(':');
+								$('#orders tr[id!="cntrl"]').each(function(i, tr) {
+									var that = this;
+									$.each(vmIds, function(i, vmId) {
+										if($(tr).attr('data-pmLink') === vmId.split("=")[0]) {
+											$(tr).attr('data-vmId', vmId.split("=")[1]);
+											return false;
+										}
+									});								
 								});
-				var li = $('<li/>').appendTo(ul);
-				$.each(vM, function(i, ele) {
-					li.html(ele.data + " " + ele.materials.name + " | ")
-						.appendTo(ul);
-				});
-				ul.marquee();
-				ul.marquee("pause")
-				parent.addPO2Modal($('<a/>', {href: '#' + vM[0].vendors.name, rel: 'inline-900-600', className: 'pirobox_gall1', 'data-pov': vM[0].vendors.name})
-						.append(vendor.find('div')), ul.clone());
-			});
-			parent.invokePiroBox();
-			$('#confirm-anc').css('display', 'inline-block').click(savePO);
-		});
-	}
-	
-	function handleMustMatch(ele) {
-	}
-	
-	function findValueForMaterial(obj) {
-		var styl = (obj.item || obj.ele.val() == '') ? 'none' : 'inline';
-		var pt = obj.ele[0].parentNode.parentNode;
-		$(pt).find('#vendor').css('display', styl);
-		$(pt).find('#new-material').css('display', styl);
-
-	}
-	
-	function findValueForVendor(obj) {
-		var styl = (obj.item || obj.ele.val() == '') ? 'none' : 'inline';
-		var pt = obj.ele[0].parentNode.parentNode;
-		$(pt).find('#new-vendor').css('display', styl);
-
-	}
+							},
+				   async : false });
+	}	
 	
 	function addOrder(ele) {
+		if(!ele)
+			return;
 		$(ele.parentNode.parentNode).find('.add')
 		 			.replaceWith(minus.clone());
 		var newOrder = order.clone().appendTo('#orders');
-		initAutoComplete(newOrder.find('#material'), findValueForMaterial, 'getMaterials');
-		initAutoComplete(newOrder.find('#vendor'), findValueForVendor, 'vendorNames');
+		newOrder.find('#material').keyup(getVendorMaterial).blur(generate);
+		newOrder.find('#vendor').keyup(getVendorMaterial4Vendor).blur(generate);
+		newOrder.find('#qty').keyup(estimate).blur(generate);
+		newOrder.find('#received').keyup(estimate).blur(generate);
+		newOrder.find('#material-cost').keyup(estimate).blur(generate);
+		newOrder.find('#material-cost-paid').keyup(estimate).blur(generate);
 	}
 	
-	var savePO = function() {
-		var page = $('#create-purchaseorder'); 
-		preAjax(page);
-		PurchaseOrder.save(function(stat) {
-			postAjax(page);
-			var cn = detectAndDoClassName(stat);
-			var type = detectAndDoType(stat, 'Purchase Order Created.');
-			acknowledge(cn, stat, type);
-			if(isSuccess(stat))
-				customFresh();
-		});
-	}
-
 	function customFresh() {
 		var trs = $('#orders').find('tr');
 		addOrder($(trs.get(-1)).find('label.add')[0]);
@@ -157,6 +127,140 @@ var minus;
 		$('#po-confirm').children().remove();
 		parent.removePiroBox();
 	}
+	
+	function getVendorMaterial(event) {
+		if(event.keyCode == 9) //stop events for TAB
+			return;
+		var par = $(this.parentNode.parentNode);
+		var that = this;
+		var vendor = $.trim(par.find('#vendor').val()) != "" ? par.find('#vendor').val() : null;
+		PurchaseOrder.getVendorMaterial(vendor, $(this).val(), function(vm) {
+			par.find('#new-material').css('display', vm.materials ? 'none' : 'inline');
+			par.find('#new-vendor').css('display', vm.vendors ? 'none' : 'inline');
+			par.find('#vendor').val(vm.vendors ? vm.vendors.name : "");
+			par.find('#new-vendor-material').css('display', !vm.data ? 'none' : 'inline');
+			$(par).attr('data-vmId', vm.vendorMaterialId);
+			//alert(vm.pricePerQty);
+			if(isNaN(vm.pricePerQty))
+				par.find('#material-cost').val(0);
+			else
+				par.find('#material-cost').val(vm.pricePerQty);
+			
+		})
+	}
+	
+	function getVendorMaterial4Vendor(event) {
+		if(event.keyCode == 9) //stop events for TAB
+			return;
+		var par = $(this.parentNode.parentNode);
+		var material = par.find('#material').val();
+		var that = this;
+		PurchaseOrder.getVendorMaterial($(this).val(), material, function(vm) {
+			par.find('#new-vendor').css('display', vm.vendors ? 'none' : 'inline');
+			//par.find('#vendor').val(vm.vendors ? vm.vendors.name : "");
+			$(par).attr('data-vmId', vm.vendorMaterialId);
+			par.find('#new-vendor-material').css('display', !vm.data ? 'none' : 'inline');
+			if(isNaN(vm.pricePerQty))
+				par.find('#material-cost').val(0);
+			else
+				par.find('#material-cost').val(vm.pricePerQty);
+		})
+	}	
+	
+	function syncPurchaseOrder() {
+		//alert(syncPO);
+		if(syncPO == null || syncPMS == null || syncPmLinker == null)
+			return;
+		//alert('syncing');
+		PurchaseOrder.generate(syncPO, syncPMS, syncPmLinker, 
+				{ callback: function(data) {
+								poId.val(data.purchaseOrderId);
+								syncPO = null;
+								syncPMS = null;
+								syncPmLinker = null;
+							},
+				async : true });
+	}
+	
+	function estimate() {
+		var sum = 0;
+		var paidSum = 0;
+		$('#orders tr[id!="cntrl"]').each(function(i, tr) {
+			var pricePerQty = $.trim($(tr).find('#material-cost').val()) != '' ?  parseFloat($.trim($(tr).find('#material-cost').val())) : 0; 
+			var qty = $.trim($(tr).find('#qty').val()) != '' ? parseFloat($.trim($(tr).find('#qty').val())) : 0;
+			var amount = (pricePerQty * qty);
+			$(tr).find('#amount-isolated').html(amount);
+			sum += amount;	
+			var paid = !isNaN(parseFloat($.trim($(tr).find('#material-cost-paid').val()))) ? parseFloat($.trim($(tr).find('#material-cost-paid').val())) : 0;
+			var paidTotal =  !isNaN(parseFloat($(tr).find('#material-cost-paid-total').html())) ?  parseFloat($(tr).find('#material-cost-paid-total').html()) : 0;
+			if($(tr).attr('paid-total')) {
+				paidTotal = paid + parseFloat($(tr).attr('paid-total'));  
+			} else {
+				paidTotal =  paid + paidTotal;
+				$(tr).attr('paid-total', paidTotal);
+			}
+			paidSum += paidTotal;
+			var remaining =  $(tr).find('#material-cost-remaining');
+			//alert(paid + " " + paidTotal);
+			
+			$(tr).find('#material-cost-paid-total').html(paidTotal);
+			
+			remaining.html(amount - paidTotal);
+			
+			var received = $.trim($(tr).find('#received').val()) != '' && !isNaN($.trim($(tr).find('#received').val())) ? parseFloat($.trim($(tr).find('#received').val())) : 0;
+			var materialReceived = $(tr).find('#material-received');
+			var materialPending = $(tr).find('#material-pending');
+			if($(tr).attr('received-total')) {
+				materialReceived.html(received + parseFloat($(tr).attr('received-total')));  
+			} else {
+				$(tr).attr('received-total', materialReceived.html() == '' ? 0 : materialReceived.html());
+				materialReceived.html($(tr).attr('received-total'));
+			}
+			$(tr).find('#material-pending').html(qty - parseFloat(materialReceived.html()));
+			//$(tr).find('#material-received').html(materialReceived + received);
+			materialPending.html(qty - parseFloat(materialReceived.html() == '' ? 0 : materialReceived.html()));
+		});
+		$('#po-amount').html(sum);
+		$('#po-due-amount').html(" " + (sum - paidSum));
+	}
+	
+	function getPO() {
+		if($.trim($(this).val()) == '' || isNaN($.trim($(this).val()))) {
+			customFresh();
+			return;
+		}
+			
+		PurchaseOrder.fetch($.trim($(this).val()), function(po) {
+			customFresh();
+			if(po == null) {
+				alert('hanlde po not ound');
+				return;
+			}
+			var trs = $('#orders tr[id!="cntrl"]');
+			$.each(po.purchaseMaterialses, function(i, pm) {
+				if(i == 0) {
+					return true;
+				} else if(i >= po.purchaseMaterialses.length) {
+					return false;
+				} else {
+					addOrder($(trs.get(i - 1)).find('#cntrl')[0]);
+				}
+			});
+			trs = $('#orders tr[id!="cntrl"]');
+			$.each(po.purchaseMaterialses, function(i, pm) {
+				var tr = trs.get(i);
+				$(tr).find('#material').val(pm.vendorMaterials.materials.name);
+				$(tr).find('#vendor').val(pm.vendorMaterials.vendors.name);
+				$(tr).find('#qty').val(pm.orderedQuantity);
+				//$(tr).find('#received').val(pm.receivedQuantity);
+				$(tr).find('#material-cost').val(pm.orderedPricePerQty);
+				$(tr).find('#material-cost-paid-total').html(pm.transportatonCharge);
+				$(tr).find('#material-received').html(pm.receivedQuantity);
+			});
+			estimate();
+		});
+	}
+	
 </script>
 
 <style>
@@ -166,7 +270,7 @@ table {
 }
 
 table td {
-	width: 33%;
+
 }
 
 #po-confirm td {
@@ -188,36 +292,62 @@ table thead tr th {
 <body >
 <form id="create-purchaseorder">
 <table>
+	<tbody>
+		<tr>
+			<td>
+				<label>Purchase Order Number</label>
+			</td>
+			<td>
+				<input id="poId" type="text" class="text" style="width: 100px;"/>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<table>
 <thead>
 	<tr>
 		<th><label>Material</label></th>
-		<th><label>Vendor (for New Materials)</label></th>
-		<th><label>Quantity</label>
-		</th>
+		<th><label>Vendor</label></th>
+		<th><label>Quantity</label></th>
+		<th><label>Received</label></th>
 	</tr>
 </thead>
 <tbody id="orders">
 	<tr id="order-clone">
-		<td>
-			<input id="material" type="text" class="text" />
-			<img  id="new-material" alt="New Material" src="../images/new.png" style="display: none;">
+		<td style="width: 220px; height: 50px;">
+			<input id="material" type="text" class="text" style="width: 100px;"/>
+			<img  id="new-material" title="New Material" src="../images/new.png" style="display: none;">
+			<br/>
+			<input id="material-cost" type="text" class="text" style="width: 30px;"/><label id="material-cost-label">Rs.</label>
 		</td>
-		<td>
-			<input id="vendor" type="text" class="text" style="display: none;"/>
-			<img  id="new-vendor" alt="New Vendor" src="../images/new.png" style="display: none;">
+		<td style="width: 220px;">
+			<input id="vendor" type="text" class="text" style="width: 100px;"/>
+			<img  id="new-vendor" title="New Vendor" src="../images/new.png" style="display: none;">
+			<br/>
+			<input id="material-cost-paid" type="text" class="text" style="width: 30px;"/><label id="material-cost-paid-label">Rs.</label>
+			<label id="material-cost-paid-total"></label><label id="material-cost-paid-total-label">Rs.</label>
+			<label id="material-cost-remaining"></label><label id="material-cost-remaining-label">Rs.</label>
 		</td>
-		<td>
-			<input id="qty" type="text" class="text" />
+		<td style="width: 150px;">
+			<input id="qty" type="text" class="text" style="width: 100px;"/>
+			<br/>
+			<label id="amount-isolated"></label><label id="amount-isolated-label">Rs.</label>
 		</td>
-		<td>
+		<td style="width: 150px;">
+			<input id="received" type="text" class="text" style="width: 100px;"/>
+			<br/>
+			<label id="material-received" ></label><label id="material-received-label">.</label>
+			<label id="material-pending"></label><label id="material-pending-label">.</label>
+		</td>
+		<td style="width: 100px; text-align: center;">
 			<label id="cntrl" class="add" onclick="addOrder(this);">+</label>
+			<img  id="new-vendor-material" title="New Vendor Material Mapping" src="../images/new.png" style="display: none;">
 		</td>
 	</tr>
 </tbody>
 <tfoot>
 	<tr id="cntrl">
-		<td colspan="4" align="center" style="padding-top: 20px;"><a
-			id="create" class="awesome green" onclick="javascript: generate();">Generate</a>
+		<td colspan="4" align="right" style="padding-top: 20px;">
 		<a class="awesome green" onclick="javascript: customFresh();">Clear</a>
 		<a class="awesome red" style="display: none;"  onclick="javascript:" id="confirm-anc">Confirm</a>
 		</td>
@@ -226,7 +356,13 @@ table thead tr th {
 </table>
 
 <table>
-	<tbody id="po-confirm">
+	<tbody>
+		<tr>
+			<td>
+				<label>Estimated Total</label><label id="po-amount"></label>
+				<label>Due Total</label><label id="po-due-amount"></label>
+			</td>
+		</tr>
 	</tbody>
 </table>
 </form>
