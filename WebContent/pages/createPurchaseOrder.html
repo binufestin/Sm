@@ -26,11 +26,12 @@ var syncPO = null, syncPMS = null, syncPmLinker = null;
 
 	$(document).ready(function(){
 		order = $('#order-clone').clone();
-		$('label.remove').live('click', function() {
+		$('img.remove').live('click', function() {
 			$(this).parents('tr').remove();
 			generate();
 		});
-		minus = $('<label/>').html('-').addClass('remove');
+		minus = $('<img/>').attr('src', '../images/delete.png').addClass('remove')
+				.css('height', '30px').css('width', '30px').css('cursor', 'pointer');
 
 		$('#material').keyup(getVendorMaterial).blur(generate);
 		$('#vendor').keyup(getVendorMaterial4Vendor).blur(generate);
@@ -108,8 +109,7 @@ var syncPO = null, syncPMS = null, syncPmLinker = null;
 	function addOrder(ele) {
 		if(!ele)
 			return;
-		$(ele.parentNode.parentNode).find('.add')
-		 			.replaceWith(minus.clone());
+		$(ele.parentNode.parentNode).find('.add').replaceWith(minus.clone());
 		var newOrder = order.clone().appendTo('#orders');
 		newOrder.find('#material').keyup(getVendorMaterial).blur(generate);
 		newOrder.find('#vendor').keyup(getVendorMaterial4Vendor).blur(generate);
@@ -121,11 +121,8 @@ var syncPO = null, syncPMS = null, syncPmLinker = null;
 	
 	function customFresh() {
 		var trs = $('#orders').find('tr');
-		addOrder($(trs.get(-1)).find('label.add')[0]);
+		addOrder($(trs.get(-1)).find('img.add')[0]);
 		trs.remove();
-		$('#confirm-anc').css('display', 'none');
-		$('#po-confirm').children().remove();
-		parent.removePiroBox();
 	}
 	
 	function getVendorMaterial(event) {
@@ -221,7 +218,8 @@ var syncPO = null, syncPMS = null, syncPmLinker = null;
 			materialPending.html(qty - parseFloat(materialReceived.html() == '' ? 0 : materialReceived.html()));
 		});
 		$('#po-amount').html(sum);
-		$('#po-due-amount').html(" " + (sum - paidSum));
+		$('#po-due-amount').html(sum - paidSum);
+		$('#po-status').html(((sum > 0) && (sum - paidSum) === 0) ? 'Closed' : 'Open');
 	}
 	
 	function getPO() {
@@ -240,10 +238,12 @@ var syncPO = null, syncPMS = null, syncPmLinker = null;
 			$.each(po.purchaseMaterialses, function(i, pm) {
 				if(i == 0) {
 					return true;
-				} else if(i >= po.purchaseMaterialses.length) {
-					return false;
-				} else {
-					addOrder($(trs.get(i - 1)).find('#cntrl')[0]);
+				} //else if(i >= po.purchaseMaterialses.length) {
+					//return false;
+				//} 
+				else {
+					addOrder($(trs.get(i - 1)).find('.add')[0]);
+					trs = $('#orders tr[id!="cntrl"]');
 				}
 			});
 			trs = $('#orders tr[id!="cntrl"]');
@@ -295,52 +295,62 @@ table thead tr th {
 	<tbody>
 		<tr>
 			<td>
-				<label>Purchase Order Number</label>
+				<label class="mini-label">Purchase Order Number</label><br/>
+				<input id="poId" type="text" class="bewel-text bewel-green"/>
 			</td>
 			<td>
-				<input id="poId" type="text" class="text" style="width: 100px;"/>
+				<label class="mini-label">Estimated Total Amount</label><br/>
+				<label id="po-amount" class="bewel-text" style="width: 120px;"></label><label class="units">Rs.</label>
 			</td>
+			<td>
+				<label class="mini-label">Due Amount</label><br/>
+				<label id="po-due-amount" class="bewel-text bewel-pink" style="width: 120px;"></label><label class="units">Rs.</label>
+			</td>
+			<td>
+				<label class="mini-label">Status</label><br/>
+				<label id="po-status" class="bewel-text bewel-wheat" style="width: 120px;"></label>
+			</td>			
 		</tr>
 	</tbody>
 </table>
 <table>
 <thead>
 	<tr>
-		<th><label>Material</label></th>
-		<th><label>Vendor</label></th>
-		<th><label>Quantity</label></th>
-		<th><label>Received</label></th>
+		<th><label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Material</label></th>
+		<th><label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Vendor</label></th>
+		<th><label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Quantity</label></th>
+		<th><label>&nbsp;&nbsp;&nbsp;&nbsp;Received</label></th>
 	</tr>
 </thead>
 <tbody id="orders">
 	<tr id="order-clone">
 		<td style="width: 220px; height: 50px;">
-			<input id="material" type="text" class="text" style="width: 100px;"/>
+			<input id="material" type="text" class="text" style="width: 100px;" autocomplete="off"/>
 			<img  id="new-material" title="New Material" src="../images/new.png" style="display: none;">
 			<br/>
-			<input id="material-cost" type="text" class="text" style="width: 30px;"/><label id="material-cost-label">Rs.</label>
+			<input id="material-cost" type="text" class="bewel-text mini bewel-green" title="Enter Price Per Quantity at the time of Purchase"/><label id="material-cost-label" class="units micro">Rs.</label>
 		</td>
 		<td style="width: 220px;">
-			<input id="vendor" type="text" class="text" style="width: 100px;"/>
+			<input id="vendor" type="text" class="text" style="width: 100px;" autocomplete="off"/>
 			<img  id="new-vendor" title="New Vendor" src="../images/new.png" style="display: none;">
 			<br/>
-			<input id="material-cost-paid" type="text" class="text" style="width: 30px;"/><label id="material-cost-paid-label">Rs.</label>
-			<label id="material-cost-paid-total"></label><label id="material-cost-paid-total-label">Rs.</label>
-			<label id="material-cost-remaining"></label><label id="material-cost-remaining-label">Rs.</label>
+			<div style="float: left;"><input id="material-cost-paid" type="text" class="bewel-text mini bewel-green" title="Enter Amount Paid to the Vendor for this Material"/><label id="material-cost-paid-label" class="units micro" >Rs.</label></div>
+			<div style="float: left;"><label id="material-cost-paid-total" class="bewel-text mini" title="Amount paid to the Vendor, so far, for this Material" style="width: 40px;"></label><label id="material-cost-paid-total-label" class="units micro" >Rs.</label></div>
+			<div style="float: left;"><label id="material-cost-remaining" class="bewel-text mini bewel-pink" title="Amount due to the Vendor for this Material" style="width: 40px;"></label><label id="material-cost-remaining-label" class="units micro">Rs.</label></div>
 		</td>
 		<td style="width: 150px;">
-			<input id="qty" type="text" class="text" style="width: 100px;"/>
+			<input id="qty" type="text" class="text" style="width: 100px;" autocomplete="off"/>
 			<br/>
-			<label id="amount-isolated"></label><label id="amount-isolated-label">Rs.</label>
+			<div style="float: left;"><label id="amount-isolated" class="bewel-text mini" title="Estimated Amount for this Material" style="width: 40px;"></label><label id="amount-isolated-label" class="units micro" >Rs.</label></div>
 		</td>
 		<td style="width: 150px;">
-			<input id="received" type="text" class="text" style="width: 100px;"/>
+			<input id="received" type="text" class="text" style="width: 100px;" autocomplete="off"/>
 			<br/>
-			<label id="material-received" ></label><label id="material-received-label">.</label>
-			<label id="material-pending"></label><label id="material-pending-label">.</label>
+			<div style="float: left;"><label id="material-received" class="bewel-text mini" title="Materials received, so far, from the Vendor"></label><label id="material-received-label" class="units"></label>
+			<div style="float: left; padding-left: 5px;"><label id="material-pending" class="bewel-text mini bewel-pink" title="Materials due from the Vendor"></label><label id="material-pending-label" class="units"></label>
 		</td>
 		<td style="width: 100px; text-align: center;">
-			<label id="cntrl" class="add" onclick="addOrder(this);">+</label>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img class="add" id="cntrl" onclick="addOrder(this);" src="../images/add.png" style="cursor: pointer; width: 30px; height: 30px;"/>
 			<img  id="new-vendor-material" title="New Vendor Material Mapping" src="../images/new.png" style="display: none;">
 		</td>
 	</tr>
@@ -348,23 +358,12 @@ table thead tr th {
 <tfoot>
 	<tr id="cntrl">
 		<td colspan="4" align="right" style="padding-top: 20px;">
-		<a class="awesome green" onclick="javascript: customFresh();">Clear</a>
-		<a class="awesome red" style="display: none;"  onclick="javascript:" id="confirm-anc">Confirm</a>
+		<!-- <a class="awesome green" onclick="javascript: customFresh();">Clear</a>  -->
 		</td>
 	</tr>
 </tfoot>	
 </table>
 
-<table>
-	<tbody>
-		<tr>
-			<td>
-				<label>Estimated Total</label><label id="po-amount"></label>
-				<label>Due Total</label><label id="po-due-amount"></label>
-			</td>
-		</tr>
-	</tbody>
-</table>
 </form>
 </body>
 </html>

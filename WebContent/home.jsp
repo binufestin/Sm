@@ -27,7 +27,7 @@ function loadAsyncScripts(asyncScripts) {
 }
 </script>
 </head>
-<body style="background: #273433;"> <!-- 376d9f -->
+<body style="background: #e2f2ff;"> <!-- 376d9f -->
 <div id="main">
 <div id="head">
 <div id="head-main">
