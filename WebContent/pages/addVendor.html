@@ -23,56 +23,88 @@
 	}
 	
 	table tr td {
-		padding: 6px 20px 6px 20px;	
+		padding: 3px 20px 3px 20px;	
 	}
 </style>
 
 <script type="text/javascript">
 
 	$(document).ready(function(){
-		pageInit('av');
 		$('input:not([name="name"])').blur(create);
 		$('input[name="name"]').keyup(get).blur(create);
-		var initName = this.URL.split('?:');
-		if(initName[1]) {
-			$('input[name="name"]').val(initName[1]);
-			get();
-		}
+		$('input[name="vendor-material"]').live('keyup', getMaterial).live('blur', createVendorMaterial);
+		$('input[name="vendor-material-price"]').live('blur', createVendorMaterial);
+		$('#remove-material').live('click', removeVendorMaterial);
+		$('#add-vendor-material').click(addMaterialSlot);
 	});
 
-	function oldcreate() {
-		var page = $('#add-vendor'); 
-		preAjax(page);
-		Vendor.create(dwr.util.getValues('add-vendor'), function(stat) {
-			postAjax(page);
-			var cn = detectAndDoClassName(stat);
-			var type = detectAndDoType(stat, 'Vendor Created.', 'add-vendor');
-			acknowledge(cn, stat, type);
-			if(type != "Error.") {
-				$('<a class="awesome no-border magenta"/>')
-				.html('Add Material')
-				.appendTo(infoBar.append("."))
-				.click(function() {
-					infoBar.hide();
-					parent.iconizeContainer('av');
-					parent.IFrameInit.getInstance().writeData($(parent.document).find('#avm'), 
-							{
-								vendor_name: stat.split(':')[1]
-							});
-					parent.showContainer('avm');
-				});
-			}
+	function attachEvents() {
+		//$(this).unbind('blur');
+		//$(this).bind('blur', create);
+	}
+	
+	function addMaterialSlot() {
+		$('input:not([name="name"])').unbind('blur');
+		$('input[name="name"]').unbind('blur');
+		var newSlot = $('#vendor-material-clone').clone();
+		newSlot.css('display', 'inline')
+		.removeAttr('id')
+		.attr('name', 'vendor-material-element')
+		.insertBefore($('#add-vendor-material'));
+		return newSlot;
+	}
+	
+	function getMaterial() {
+		var that = this;
+		Vendor.getMaterials($.trim(this.value), function(data) {
+			if(!data.materialId)
+				$(that.parentNode).find('#new-material').css('display', 'inline');
+			else
+				$(that.parentNode).find('#new-material').css('display', 'none');
 		});
 	}
 	
-	function create() {
+	function createVendorMaterial() {
+		var par = this.parentNode;
+		var material = $.trim($(par).find('input[name="vendor-material"]').val());
+		$(par).find('input[name="vendor-material"]').val(material);
+		var prc = $.trim($(par).find('input[name="vendor-material-price"]').val())
+		if(material == '' || prc == '')
+			return;
+		var price = prc == '' ? 0 : parseFloat(prc);
+		 
+		Vendor.createVendorMaterial($('#add-vendor').attr('vendorId'), material, price, function(vm) {
+			$(par).attr('vendorMaterialId', vm.vendorMaterialId);
+		});
+	}
+	
+	function removeVendorMaterial() {
+		var vmId = $(this.parentNode).attr('vendorMaterialId');
+		$(this.parentNode).remove();
+		if(!vmId)
+			return;
+		Vendor.deleteVendorMaterial(vmId, function(stat) {
+			if(stat != true)
+				alert('Delete Failed: ' + stat);
+		});
+	}
+	
+	function create(e) {
 		Vendor.create(dwr.util.getValues('add-vendor'), function(stat) {
 			if(stat instanceof String) {
+				$('#add-vendor-material').css('display', 'none');
+				$('#vendor-material-bay').find('div[name="vendor-material-element"]').remove();
 				alert(stat);
 				return;
 			}
-			populate(stat);
+			
+			//alert(stat.vendor);
+			populate(stat.vendor);
+			populateMaterials(stat.vms);
 			$('#new-vendor').css('display', 'none');
+			$('#add-vendor').attr('vendorId', stat.vendor.vendorId);
+			$('#add-vendor-material').css('display', 'inline');
+			
 		});
 	}
 	
@@ -80,16 +112,23 @@
 		Vendor.get(dwr.util.getValues('add-vendor'), function(stat) {
 			if(stat instanceof String) {
 				alert(stat);
+				$('#add-vendor-material').css('display', 'none');
+				$('#vendor-material-bay').find('div[name="vendor-material-element"]').remove();
 				return;
 			}
-			if(!stat.vendorId) {
+			if(!stat.vendor.vendorId) {
 				$('#new-vendor').css('display', 'inline-block');
 				var name = $('input[name="name"]').val();
 				fresh('add-vendor');
 				$('input[name="name"]').val(name);
+				$('#add-vendor-material').css('display', 'none');
+				$('#vendor-material-bay').find('div[name="vendor-material-element"]').remove();
 			} else {
 				$('#new-vendor').css('display', 'none');
-				populate(stat);
+				populate(stat.vendor);
+				populateMaterials(stat.vms);
+				$('#add-vendor').attr('vendorId', stat.vendor.vendorId);
+				$('#add-vendor-material').css('display', 'inline');
 			}
 		});
 	}
@@ -99,6 +138,16 @@
 			if(v instanceof Object)
 				populate(v, k + ".")
 			$('input[name="' + prefix + k + '"]').val(v == null ? "" : v);
+		});
+	}
+	
+	function populateMaterials(vms) {
+		$('#vendor-material-bay').find('div[name="vendor-material-element"]').remove();
+		$.each(vms, function(i, vm) {
+			var newSlot = addMaterialSlot();
+			newSlot.find('input[name="vendor-material"]').val(vm.materials.name);
+			newSlot.find('input[name="vendor-material-price"]').val(vm.pricePerQty);
+			newSlot.attr('vendorMaterialId', vm.vendorMaterialId);
 		});
 	}
 	
@@ -149,10 +198,24 @@
 		<td><input name="addresses.email" class="text"/></td>
 	</tr>
 	<tr>
-		<td colspan="4" align="right" style="padding-top: 50px;">
-			<a class="awesome green" onclick="javascript: fresh('add-vendor');" style="text-decoration: none;">Clear</a>
+			<td colspan="4" align="left" style="padding-top: 15px;">
+				<label>Materials (Name | Price in Rs.)</label>
+			</td>
+	</tr>
+	 <tr id="vendor-material-bay">
+		<td colspan="4" align="left" style="padding-top: 15px;">
+			<div style="width: 175px; height: 30px; float: left; display: none; padding-bottom: 15px;" id="vendor-material-clone" 
+				onmouseover="$(this).find('#remove-material').css('display', 'inline');" onmouseout="$(this).find('#remove-material').css('display', 'none');">
+				<input name="vendor-material" type="text" class="bewel-text medium" style="padding-top: 20px;">
+				<input name="vendor-material-price" type="text" class="bewel-text bewel-pink medium" style="width: 30px; padding-top: 20px;">
+				<img  id="new-material" title="New Material" src="../images/new.png" style="display: none; float: left;">
+				<img  id="remove-material" title="Remove Vendor Material" src="../images/delete.png" style="height: 22px; width: 22px; cursor: pointer; display: none;">
+			</div>		
+			<div id="vendor-material-cntrl">
+				<img  id="add-vendor-material" title="Add Vendor Material" src="../images/add.png" style="height: 40px; width: 40px;  cursor: pointer; display: none;"/>
+			</div>			
 		</td>
-	</tr>	
+	</tr>
 </table>
 </form>
 </body>

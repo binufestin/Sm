@@ -1521,6 +1521,13 @@ input[type="text"], input[type="password"], textarea, select {
 	box-shadow:0px 0px 0 #C6E5E7;
 }
 
+.medium {
+    height: 1px;
+    width: 80px;
+    font-size: 13px;
+    padding:2px 4px;
+}
+
 .units {
 	margin-top: 5px;
     font-size: 11px;
