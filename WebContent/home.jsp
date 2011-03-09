@@ -45,8 +45,8 @@ function loadAsyncScripts(asyncScripts) {
 <div id="container">
 	<img align="left" src="./images/Bulldozer.png"
 	style="display: none; padding-top: 135px; padding-left: 100px;"></img>
-	<img src="./images/caption.png" 
-	style="display: none; padding-top: 280px; padding-left: 50px;"/>
+	<!-- <img src="./images/caption.png" 
+	style="display: none; padding-top: 280px; padding-left: 50px;"/> -->
 	
 </div>
 </div>
