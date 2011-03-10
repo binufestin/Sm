@@ -28,6 +28,13 @@
 </style>
 
 <script type="text/javascript">
+
+document.onkeydown = openContainer;
+function openContainer(e) {
+	if(!e) e = window.event;
+	parent.openContainer(e)
+}
+
 var clickJustFired = false;
 	$(document).ready(function(){
 		$('input:not([name="name"])').blur(create);
