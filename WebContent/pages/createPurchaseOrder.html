@@ -260,6 +260,7 @@ var syncPO = null, syncPMS = null, syncPmLinker = null;
 				$(tr).find('#material-cost').val(pm.orderedPricePerQty);
 				$(tr).find('#material-cost-paid-total').html(pm.transportatonCharge);
 				$(tr).find('#material-received').html(pm.receivedQuantity);
+				$(tr).attr('data-vmId', pm.vendorMaterials.vendorMaterialId);
 			});
 			estimate();
 		});
