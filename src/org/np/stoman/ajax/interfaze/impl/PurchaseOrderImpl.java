@@ -1,10 +1,13 @@
 package org.np.stoman.ajax.interfaze.impl;
 
 import static org.np.stoman.dao.support.HibernateSupport.getHibernateSupport;
+import static org.np.stoman.dao.support.Order.ASC;
 import static org.np.stoman.dao.support.Restrict.EQ;
+import static org.np.stoman.dao.support.Restrict.IN;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +18,7 @@ import org.np.stoman.persistence.Addresses;
 import org.np.stoman.persistence.Materials;
 import org.np.stoman.persistence.PurchaseMaterials;
 import org.np.stoman.persistence.PurchaseOrders;
+import org.np.stoman.persistence.Ranks;
 import org.np.stoman.persistence.Users;
 import org.np.stoman.persistence.VendorMaterials;
 import org.np.stoman.persistence.Vendors;
@@ -141,7 +145,19 @@ public class PurchaseOrderImpl extends BaseImpl implements PurchaseOrder {
 				newVM.setData("newVendorMaterial");
 			return newVM;
 		}
-		return vms.get(0);
+
+		Map<Integer, VendorMaterials> vIds = new HashMap<Integer, VendorMaterials>();
+		for (VendorMaterials vm : vms)
+			vIds.put(vm.getVendors().getVendorId(), vm);
+		cb = new CriteriaBuilder(Ranks.class);
+		List<Ranks> ranks = getHibernateSupport()
+				.get(cb.getCriteria(),
+						ASC.order("rank"),
+						IN.restrict(new Object[] { cb.wrap("vendors.id"),
+								vIds.keySet() }));
+		if (ranks.isEmpty())
+			return vms.get(0);
+		return vIds.get(ranks.get(0).getVendors().getVendorId());
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package org.np.stoman.ajax.interfaze;
 
 import java.util.Map;
 
+import org.np.stoman.persistence.Ranks;
 import org.np.stoman.persistence.VendorMaterials;
 
 public interface Vendor extends AjaxMarker {
@@ -15,4 +16,8 @@ public interface Vendor extends AjaxMarker {
 			Float price);
 
 	boolean deleteVendorMaterial(Integer vmId);
+
+	public Ranks getRank(Integer vId);
+
+	public Ranks updateRank(Integer vId, Integer rankVal);
 }

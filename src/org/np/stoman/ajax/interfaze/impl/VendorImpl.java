@@ -16,6 +16,7 @@ import org.hibernate.FetchMode;
 import org.np.stoman.ajax.interfaze.Vendor;
 import org.np.stoman.dao.support.CriteriaBuilder;
 import org.np.stoman.persistence.Materials;
+import org.np.stoman.persistence.Ranks;
 import org.np.stoman.persistence.Users;
 import org.np.stoman.persistence.VendorMaterials;
 import org.np.stoman.persistence.Vendors;
@@ -136,5 +137,46 @@ public class VendorImpl extends BaseImpl implements Vendor {
 				vmId);
 		getHibernateSupport().delete(vm);
 		return true;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Ranks getRank(Integer vId) {
+		Ranks rank;
+		CriteriaBuilder cb = new CriteriaBuilder(Ranks.class);
+		List<Ranks> ranks = getHibernateSupport().get(cb.getCriteria(),
+				EQ.restrict(new Object[] { cb.wrap("vendors.id"), vId }));
+		if (ranks.isEmpty())
+			rank = new Ranks();
+		else
+			rank = ranks.get(0);
+		return rank;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Ranks updateRank(Integer vId, Integer rankVal) {
+		Users user = getHibernateSupport().get(Users.class, 1);
+		Date today = new Date();
+		Ranks rank;
+		CriteriaBuilder cb = new CriteriaBuilder(Ranks.class);
+		List<Ranks> ranks = getHibernateSupport().get(cb.getCriteria(),
+				EQ.restrict(new Object[] { cb.wrap("vendors.id"), vId }));
+		if (ranks.isEmpty()) {
+			rank = new Ranks();
+			rank.setRank(rankVal);
+			Vendors v = getHibernateSupport().get(Vendors.class, vId);
+			rank.setVendors(v);
+			rank.setModifiedDate(today);
+			rank.setUsers(user);
+		} else {
+			rank = ranks.get(0);
+			rank.setRank(rankVal);
+			rank.setModifiedDate(today);
+			rank.setUsers(user);
+		}
+
+		getHibernateSupport().save(rank);
+		return rank;
 	}
 }

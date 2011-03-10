@@ -36,6 +36,7 @@ var clickJustFired = false;
 		$('input[name="vendor-material-price"]').live('blur', createVendorMaterial);
 		$('#remove-material').live('click', removeVendorMaterial);
 		$('#add-vendor-material').click(addMaterialSlot);
+		$('#vendor-rank').keyup(updateRank);
 	});
 	
 	function addMaterialSlot() {
@@ -94,6 +95,7 @@ var clickJustFired = false;
 		Vendor.create(dwr.util.getValues('add-vendor'), function(stat) {
 			if(stat instanceof String) {
 				$('#add-vendor-material').css('display', 'none');
+				$('#rank-placeholder').css('display', 'none').val('-');
 				$('#vendor-material-bay').find('div[name="vendor-material-element"]').remove();
 				alert(stat);
 				return;
@@ -105,7 +107,8 @@ var clickJustFired = false;
 			$('#new-vendor').css('display', 'none');
 			$('#add-vendor').attr('vendorId', stat.vendor.vendorId);
 			$('#add-vendor-material').css('display', 'inline');
-			
+			$('#rank-placeholder').css('display', 'inline');
+			getRank(stat.vendor.vendorId);
 		});
 	}
 	
@@ -114,6 +117,7 @@ var clickJustFired = false;
 			if(stat instanceof String) {
 				alert(stat);
 				$('#add-vendor-material').css('display', 'none');
+				$('#rank-placeholder').css('display', 'none').val('-');
 				$('#vendor-material-bay').find('div[name="vendor-material-element"]').remove();
 				return;
 			}
@@ -123,12 +127,15 @@ var clickJustFired = false;
 				fresh('add-vendor');
 				$('input[name="name"]').val(name);
 				$('#add-vendor-material').css('display', 'none');
+				$('#rank-placeholder').css('display', 'none').val('-');
 				$('#vendor-material-bay').find('div[name="vendor-material-element"]').remove();
 			} else {
 				$('#new-vendor').css('display', 'none');
 				populate(stat.vendor);
 				populateMaterials(stat.vms);
 				$('#add-vendor').attr('vendorId', stat.vendor.vendorId);
+				$('#rank-placeholder').css('display', 'inline');
+				getRank(stat.vendor.vendorId);
 				$('#add-vendor-material').css('display', 'inline');
 			}
 		});
@@ -153,15 +160,35 @@ var clickJustFired = false;
 		});
 	}
 	
+	function getRank(vId) {
+		Vendor.getRank(vId, function(data) {
+			$('#vendor-rank').val(data.rank > 0 ? data.rank : '-');
+		});
+	}
+	
+	function updateRank() {
+		var rank = $('#vendor-rank');
+		if($.trim(rank.val()) == '' || isNaN($.trim(rank.val()))) {
+			rank.val('');
+			return;
+		}
+		Vendor.updateRank($('#add-vendor').attr('vendorId'), $.trim(rank.val()), function(data) {
+			if(!data.rank)
+				alert('Ranking failed');
+		});
+		
+	}
+	
 </script>
 
 </head>
 <body>
 <form id="add-vendor">
-<table width="100%" style="padding-top: 20px;">
+<table width="100%" style="padding-top: 0px;">
 	<tr>
 		<td><label for="name" name="name_lbl">Name</label></td>
-		<td colspan="3"><input name="name" class="text"/> &nbsp; <img  id="new-vendor" alt="New Vendor" src="../images/new.png" style="display: none;"></td>
+		<td colspan="2"><input name="name" class="text"/> &nbsp; <img  id="new-vendor" alt="New Vendor" src="../images/new.png" style="display: none;"></td>
+		<td id="rank-placeholder" style="display: none;"><input class="bewel-text bewel-wheat medium" style="padding-top: 20px;" value="Rank" disabled="disabled"/><input type="text" id="vendor-rank" class="bewel-text bewel-blue medium" style="padding-top: 20px; width: 30px;"/></td>
 	</tr>
 	<tr>
 		<td><label for="addresses.streetName1" name="streetName1_lbl">Plot No. &amp; Name </label></td>
