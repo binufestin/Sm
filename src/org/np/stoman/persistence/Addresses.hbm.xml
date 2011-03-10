@@ -29,5 +29,17 @@
         <property name="country" type="string">
             <column name="country" length="45" />
         </property>
+        <property name="phone" type="string">
+            <column name="phone" length="45" />
+        </property>
+        <property name="mobile" type="string">
+            <column name="mobile" length="45" />
+        </property>
+        <property name="fax" type="string">
+            <column name="fax" length="45" />
+        </property>
+        <property name="email" type="string">
+            <column name="email" length="45" />
+        </property>
     </class>
 </hibernate-mapping>

@@ -28,7 +28,7 @@
 </style>
 
 <script type="text/javascript">
-
+var clickJustFired = false;
 	$(document).ready(function(){
 		$('input:not([name="name"])').blur(create);
 		$('input[name="name"]').keyup(get).blur(create);
@@ -37,15 +37,11 @@
 		$('#remove-material').live('click', removeVendorMaterial);
 		$('#add-vendor-material').click(addMaterialSlot);
 	});
-
-	function attachEvents() {
-		//$(this).unbind('blur');
-		//$(this).bind('blur', create);
-	}
 	
 	function addMaterialSlot() {
-		$('input:not([name="name"])').unbind('blur');
-		$('input[name="name"]').unbind('blur');
+		clickJustFired = true;
+		//$('input:not([name="name"])').unbind('blur');
+		//$('input[name="name"]').unbind('blur');
 		var newSlot = $('#vendor-material-clone').clone();
 		newSlot.css('display', 'inline')
 		.removeAttr('id')
@@ -90,6 +86,11 @@
 	}
 	
 	function create(e) {
+		if(clickJustFired) {
+			clickJustFired = false;
+			return;
+		}
+			
 		Vendor.create(dwr.util.getValues('add-vendor'), function(stat) {
 			if(stat instanceof String) {
 				$('#add-vendor-material').css('display', 'none');
@@ -145,6 +146,7 @@
 		$('#vendor-material-bay').find('div[name="vendor-material-element"]').remove();
 		$.each(vms, function(i, vm) {
 			var newSlot = addMaterialSlot();
+			//alert(newSlot.find('input[name="vendor-material"]').val())
 			newSlot.find('input[name="vendor-material"]').val(vm.materials.name);
 			newSlot.find('input[name="vendor-material-price"]').val(vm.pricePerQty);
 			newSlot.attr('vendorMaterialId', vm.vendorMaterialId);

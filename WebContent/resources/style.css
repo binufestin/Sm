@@ -1378,7 +1378,7 @@ table td {
 	font-family: Century Gothic, Helvetica, sans-serif;
 	font-size: 50px;
 	font-weight: bold;
-	width: 250px;
+	width: 230px;
 	color: #222;
 	text-shadow: 0px 2px 3px #555;
 }
@@ -1396,19 +1396,16 @@ fieldset legend {
 
 .login-button {
 	color: #637897;
-	font-family: Century Gothic, Helvetica, sans-serif;
-	font-size: 40px;
-	font-weight: bold;
+	font-family: "TechniqueBRKNormal", Century Gothic, Helvetica, sans-serif;
+	font-size: 25px;
+	font-weight: bolder;
 	color: #222;
 	text-shadow: 0px 2px 3px #555;
 }
 
-.login-button:hover {
-	text-decoration: underline;
-}
-
-.login-button:focus {
-	text-decoration: underline;
+.login-button:hover, .login-button:focus {
+	text-shadow: 0px 4px 6px #555;
+	font-family: "TechniqueOLBRKNormal", "TechniqueBRKNormal", Century Gothic, Helvetica, sans-serif;
 }
 
 input[type="text"], input[type="password"], textarea, select { 

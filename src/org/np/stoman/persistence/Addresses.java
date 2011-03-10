@@ -21,6 +21,10 @@ public class Addresses implements java.io.Serializable {
 	private Integer zip;
 	private String state;
 	private String country;
+	private String phone;
+	private String mobile;
+	private String fax;
+	private String email;
 
 	public Addresses() {
 	}
@@ -49,6 +53,38 @@ public class Addresses implements java.io.Serializable {
 
 	public void setAddressId(int addressId) {
 		this.addressId = addressId;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public String getMobile() {
+		return mobile;
+	}
+
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+
+	public String getFax() {
+		return fax;
+	}
+
+	public void setFax(String fax) {
+		this.fax = fax;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	public String getStreetName1() {
