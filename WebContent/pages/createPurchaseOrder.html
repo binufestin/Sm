@@ -33,6 +33,7 @@ var syncPO = null, syncPMS = null, syncPmLinker = null;
 		$('img.remove').live('click', function() {
 			$(this).parents('tr').remove();
 			generate();
+			estimate();
 		});
 		minus = $('<img/>').attr('src', '../images/delete.png').addClass('remove')
 				.css('height', '30px').css('width', '30px').css('cursor', 'pointer');

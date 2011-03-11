@@ -1,6 +1,6 @@
 select * from purchase_materials order by purchase_material_id desc;
 select * from purchase_orders order by purchase_order_id desc;
-select * from vendor_materials where vendor_id = 100;
+select * from vendor_materials where vendor_id = 106;
 select * from materials;
 select * from vendors;
 select * from ranks;

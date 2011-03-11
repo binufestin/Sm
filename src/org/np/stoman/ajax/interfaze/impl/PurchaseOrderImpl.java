@@ -56,7 +56,8 @@ public class PurchaseOrderImpl extends BaseImpl implements PurchaseOrder {
 								vmR.getVendors().getName() }));
 				if (vendors.isEmpty()) {
 					Vendors v = vmR.getVendors();
-					Addresses a = getHibernateSupport().get(Addresses.class, 1);
+					Addresses a = new Addresses();// getHibernateSupport().get(Addresses.class,
+													// 1);
 					v.setAddresses(a);
 					getHibernateSupport().save(v);
 				} else {
