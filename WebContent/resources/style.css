@@ -1378,7 +1378,7 @@ table td {
 	font-family: Century Gothic, Helvetica, sans-serif;
 	font-size: 50px;
 	font-weight: bold;
-	width: 230px;
+	width: 210px;
 	color: #222;
 	text-shadow: 0px 2px 3px #555;
 }
@@ -1397,7 +1397,7 @@ fieldset legend {
 .login-button {
 	color: #637897;
 	font-family: "TechniqueBRKNormal", Century Gothic, Helvetica, sans-serif;
-	font-size: 25px;
+	font-size: 40px;
 	font-weight: bolder;
 	color: #222;
 	text-shadow: 0px 2px 3px #555;
